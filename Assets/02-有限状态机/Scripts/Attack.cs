@@ -9,7 +9,8 @@ public class Attack : FSMState
 
     public Attack(FSMSystem 归属管理器) : base(归属管理器)
     {
-        shell = Resources.Load<GameObject>("Shell");
+        状态 = 状态.攻击;
+        //shell = Resources.Load<GameObject>("Shell");
         attacked = false;
     }
 
@@ -25,7 +26,8 @@ public class Attack : FSMState
 
     public void 攻击()
     {
-        GameObject.Instantiate(shell);
+        //Debug.Log("攻击状态");
+        //GameObject.Instantiate(shell);
         attacked = true;
     }
 

@@ -22,11 +22,10 @@ public class Chase : FSMState
         状态 = 状态.追击;
         
         目标 = GameObject.FindGameObjectWithTag("Player").transform;
-        target = 目标.transform.position;
         attackTime = 1.5f;
         attackDis = 1;
         timer = 1.5f;
-        chaseSpeed = 20;
+        chaseSpeed = 15;
         radius = 36;
         stopDis = 150;
     }
@@ -46,33 +45,37 @@ public class Chase : FSMState
     {
         Debug.Log("追击状态");
         rigidbody = AI.GetComponent<Rigidbody>();
+        target = 目标.transform.position;
         offset = target - AI.transform.position;
+        offset.y = 0;
+        angle = Vector3.Angle(offset, AI.transform.forward);
+        
+        float minAngle = Mathf.Min(angle, 100 * Time.deltaTime);//防止旋转角度过小
+        //Vector3.Cross(a,b)代表a向量与b向量的×积，垂直于a和b，并且决定了旋转的方向                                                     
+        //围绕垂直的轴没帧旋转最小的角度，旋转角度固定
+        Vector3 axis = Vector3.Cross(AI.transform.forward, offset);
+        
+        axis.x = axis.z = 0;
+        AI.transform.Rotate(axis, minAngle);
+
         if (timer < attackTime)
         {
             timer += Time.deltaTime;
         }
+
         if (Vector3.SqrMagnitude(offset) > stopDis)     //判断自身位置与目标位置距离是否小于停止距离
         {
-            float minAngle = Mathf.Min(angle, 100 * Time.deltaTime);//防止旋转角度过小
-            //Vector3.Cross(a,b)代表a向量与b向量的×积，垂直于a和b，并且决定了旋转的方向                                                     
-            //围绕垂直的轴没帧旋转最小的角度，旋转角度固定
-            AI.transform.Rotate(Vector3.Cross(AI.transform.forward, offset), minAngle);
-
             //没帧朝着前方移动,移动速度固定
             rigidbody.velocity += AI.transform.forward * Time.deltaTime * chaseSpeed;
             
         }
         else if (Vector3.SqrMagnitude(offset) < stopDis) //如果跑到了攻击范围内
         {
-            float minAngle = Mathf.Min(angle, 100 * Time.deltaTime);//防止旋转角度过小
-            //Vector3.Cross(a,b)代表a向量与b向量的×积，垂直于a和b，并且决定了旋转的方向                                                     
-            //围绕垂直的轴没帧旋转最小的角度，旋转角度固定
-            AI.transform.Rotate(Vector3.Cross(AI.transform.forward, offset), minAngle);
-
             //没帧朝着后方移动,移动速度固定
-            rigidbody.velocity += AI.transform.forward * Time.deltaTime * chaseSpeed;
-            
+            rigidbody.velocity -= AI.transform.forward * Time.deltaTime * chaseSpeed;
         }
+
+        //Debug.Log(rigidbody.velocity + " " + rigidbody.velocity.magnitude);
     }
 
     public void 丢失目标(GameObject AI)
@@ -80,7 +83,7 @@ public class Chase : FSMState
         //判断是否看到了玩家
         Collider[] enemys;
         enemys = Physics.OverlapSphere(AI.transform.position, radius);
-        Debug.Log(enemys.Length);
+
         foreach (var enemy in enemys)
         {
             if (enemy.tag == "Player")
@@ -91,10 +94,14 @@ public class Chase : FSMState
                     Ray ray = new Ray(AI.transform.position + AI.transform.up * 0.1f, enemy.transform.position - AI.transform.position);
                     RaycastHit hit;
                     Physics.Raycast(ray, out hit);
-                    if (hit.transform != null && hit.transform.tag == "Player")
+                    if (hit.transform == null || hit.transform.tag != "Player")
                     {
                         状态机.转换状态(转换条件.丢失玩家);
                     }
+                }
+                else
+                {
+                    状态机.转换状态(转换条件.丢失玩家);
                 }
             }
         }

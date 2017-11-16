@@ -6,7 +6,6 @@ using UnityEngine;
 public class Patrol : FSMState
 {
     private Transform[] 巡逻点;
-    private Transform 目标;
     private Rigidbody rigidbody;
     private int index;
     private Vector3 target;
@@ -21,7 +20,6 @@ public class Patrol : FSMState
         状态 = 状态.巡逻;
         //包含父节点的坐标,不过这里不影响,所以不做处理
         巡逻点 = GameObject.Find("WayPoint").GetComponentsInChildren<Transform>();
-        目标 = GameObject.FindGameObjectWithTag("Player").transform;
         patrolSpeed = 10;
         radius = 18;
         index = 0;
@@ -44,7 +42,7 @@ public class Patrol : FSMState
         rigidbody = AI.GetComponent<Rigidbody>();
         
         target = 巡逻点[index].position;
-        offset = offset = target - AI.transform.position;
+        offset = target - AI.transform.position;
         offset.y = 0;
         //Debug.Log(offset.y);
         angle = Vector3.Angle(offset, AI.transform.forward);
@@ -55,7 +53,7 @@ public class Patrol : FSMState
             AI.transform.Rotate(Vector3.Cross(AI.transform.forward, offset), minAngle);
             //每帧向前移动
             AI.transform.position += AI.transform.forward * Time.deltaTime * patrolSpeed;
-            
+            //rigidbody.velocity += AI.transform.forward * Time.deltaTime * patrolSpeed;
         }
         else
         {

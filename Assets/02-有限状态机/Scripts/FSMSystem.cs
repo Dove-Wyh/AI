@@ -15,7 +15,7 @@ public class FSMSystem
         当前状态脚本.判断转换条件(AI);
     }
 
-    public void 添加状态脚本(FSMState 状态脚本)  
+    public void 添加状态脚本(FSMState 状态脚本)
     {
         if (状态脚本 == null)
         {
@@ -33,7 +33,7 @@ public class FSMSystem
             Debug.LogError("状态脚本已经存在");
             return;
         }
-        状态字典.Add(状态脚本.状态,状态脚本);
+        状态字典.Add(状态脚本.状态, 状态脚本);
     }
 
     public void 删除状态(FSMState 状态脚本)
@@ -55,7 +55,7 @@ public class FSMSystem
             Debug.LogError("状态字典不存在 " + 转换到状态 + " 状态,无法转换");
             return;
         }
-        Debug.Log("当前状态" + 当前状态.ToString() + "转换到{1}状态"+  转换到状态.ToString());
+
         FSMState 转换到状态脚本 = 状态字典[转换到状态];
         当前状态脚本.离开状态之后();
 
