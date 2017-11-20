@@ -38,7 +38,7 @@ public class Patrol : FSMState
 
     public void 自动巡逻(GameObject AI)
     {
-        Debug.Log("巡逻状态");
+        //Debug.Log("巡逻状态");
         rigidbody = AI.GetComponent<Rigidbody>();
         
         target = 巡逻点[index].position;

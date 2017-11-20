@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class Chase : FSMState
 {
-    private Rigidbody rigidbody;
+    //private Rigidbody rigidbody;
     private Transform 目标;
     private Vector3 target;
     private Vector3 offset;
@@ -15,19 +15,23 @@ public class Chase : FSMState
     private float radius;
     private float stopDis;
     private float attackDis;
+    private float rockDis;
     private float angle;
+    private bool forward;
 
     public Chase(FSMSystem 归属管理器) : base(归属管理器)
     {
         状态 = 状态.追击;
-        
+
         目标 = GameObject.FindGameObjectWithTag("Player").transform;
         attackTime = 1.5f;
-        attackDis = 1;
+        attackDis = 18;
         timer = 1.5f;
         chaseSpeed = 15;
         radius = 36;
-        stopDis = 150;
+        stopDis = 18;
+        rockDis = 3;
+        forward = true;
     }
 
     public override void 自身状态行为(GameObject AI)
@@ -43,18 +47,18 @@ public class Chase : FSMState
 
     public void 追击(GameObject AI)
     {
-        Debug.Log("追击状态");
-        rigidbody = AI.GetComponent<Rigidbody>();
+        //Debug.Log("追击状态");
+        //rigidbody = AI.GetComponent<Rigidbody>();
         target = 目标.transform.position;
         offset = target - AI.transform.position;
         offset.y = 0;
         angle = Vector3.Angle(offset, AI.transform.forward);
-        
+
         float minAngle = Mathf.Min(angle, 100 * Time.deltaTime);//防止旋转角度过小
         //Vector3.Cross(a,b)代表a向量与b向量的×积，垂直于a和b，并且决定了旋转的方向                                                     
         //围绕垂直的轴没帧旋转最小的角度，旋转角度固定
         Vector3 axis = Vector3.Cross(AI.transform.forward, offset);
-        
+
         axis.x = axis.z = 0;
         AI.transform.Rotate(axis, minAngle);
 
@@ -62,20 +66,32 @@ public class Chase : FSMState
         {
             timer += Time.deltaTime;
         }
-
-        if (Vector3.SqrMagnitude(offset) > stopDis)     //判断自身位置与目标位置距离是否小于停止距离
+        
+        if (Vector3.Magnitude(offset) > stopDis + rockDis)     //判断自身位置与目标位置距离是否小于停止距离
         {
             //没帧朝着前方移动,移动速度固定
-            rigidbody.velocity += AI.transform.forward * Time.deltaTime * chaseSpeed;
-            
+            //rigidbody.velocity += AI.transform.forward * Time.deltaTime * chaseSpeed;
+            AI.transform.position += AI.transform.forward * Time.deltaTime * chaseSpeed;
+            forward = true;
         }
-        else if (Vector3.SqrMagnitude(offset) < stopDis) //如果跑到了攻击范围内
+        else if (Vector3.Magnitude(offset) < stopDis - rockDis) //如果跑到了攻击范围内
         {
             //没帧朝着后方移动,移动速度固定
-            rigidbody.velocity -= AI.transform.forward * Time.deltaTime * chaseSpeed;
+            //rigidbody.velocity -= AI.transform.forward * Time.deltaTime * chaseSpeed;
+            AI.transform.position -= AI.transform.forward * Time.deltaTime * chaseSpeed;
+            forward = false;
         }
-
-        //Debug.Log(rigidbody.velocity + " " + rigidbody.velocity.magnitude);
+        else
+        {
+            if (forward == true)
+            {
+                AI.transform.position += AI.transform.forward * Time.deltaTime * 3;
+            }
+            if (forward == false)
+            {
+                AI.transform.position -= AI.transform.forward * Time.deltaTime * 3;
+            }
+        }
     }
 
     public void 丢失目标(GameObject AI)
@@ -109,7 +125,7 @@ public class Chase : FSMState
 
     public void 到达攻击范围(GameObject AI)
     {
-        if (Mathf.Abs(Vector3.SqrMagnitude(offset) - stopDis) < attackDis && timer >= attackTime)
+        if (Mathf.Abs(Vector3.Magnitude(offset) - attackDis) < 1.5f && timer >= attackTime)
         {
             timer = 0;
             状态机.转换状态(转换条件.可以攻击);

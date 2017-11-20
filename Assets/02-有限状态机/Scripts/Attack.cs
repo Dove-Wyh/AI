@@ -26,7 +26,7 @@ public class Attack : FSMState
 
     public void 攻击()
     {
-        //Debug.Log("攻击状态");
+        Debug.Log("攻击状态");
         //GameObject.Instantiate(shell);
         attacked = true;
     }
