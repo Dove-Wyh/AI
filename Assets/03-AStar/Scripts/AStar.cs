@@ -60,7 +60,11 @@ public class AStar : MonoBehaviour
         map[7, 3].sign = 1;
         map[7, 2].sign = 1;
         map[5, 3].sign = 2;
-        map[5, 8].sign = 3;
+        map[5, 6].sign = 3;
+        map[4, 6].sign = 1;
+        map[4, 7].sign = 1;
+        map[6, 6].sign = 1;
+        map[6, 7].sign = 1;
         //在unity中显示起点与终点和障碍物
         foreach (Point point in map)
         {
